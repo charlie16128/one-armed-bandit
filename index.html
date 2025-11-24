@@ -1,67 +1,130 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-TW">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>簡單吃角子老虎機（Letters Slot）</title>
+  <title>Letters Slot - 會員版</title>
   <style>
     :root{
       --bg:#0f1724; --card:#0b1220; --accent:#7c5cff; --glass: rgba(255,255,255,0.04);
-      --text:#e6eef8;
+      --text:#e6eef8; --error: #ff5c5c;
     }
     *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial; margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#07112b 0%, #0b1a2e 100%); color:var(--text)}
-    .wrap{width:360px; background:linear-gradient(180deg,var(--card), #071021); padding:20px; border-radius:14px; box-shadow:0 8px 30px rgba(2,6,23,0.6);}
-    h1{font-size:18px;margin:0 0 12px;text-align:center}
-    .status{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .balance{background:var(--glass);padding:8px 12px;border-radius:10px;font-weight:600}
+    
+    /* 共用容器樣式 */
+    .wrap{width:360px; background:linear-gradient(180deg,var(--card), #071021); padding:24px; border-radius:16px; box-shadow:0 8px 30px rgba(2,6,23,0.6); transition: height 0.3s ease;}
+    
+    h1{font-size:20px;margin:0 0 16px;text-align:center; color: #fff;}
+    h2{font-size:16px; margin:0 0 12px; text-align:center; opacity:0.8;}
+
+    /* 表單樣式 (登入用) */
+    .form-group {margin-bottom: 12px;}
+    label {display:block; font-size:12px; margin-bottom:4px; opacity:0.7;}
+    input[type=text], input[type=password], input[type=number] {
+      width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); 
+      background:rgba(0,0,0,0.2); color:var(--text); outline:none; transition: border-color 0.2s;
+    }
+    input:focus{border-color:var(--accent);}
+    
+    .btn-group {display:flex; gap:10px; margin-top:20px;}
+    button{flex:1; padding:12px; border-radius:10px; border:0; font-weight:700; cursor:pointer; color:white; transition:0.2s;}
+    .btn-primary {background:linear-gradient(90deg,var(--accent),#4bb5ff); box-shadow:0 4px 15px rgba(124,92,255,0.3);}
+    .btn-primary:hover {filter:brightness(1.1);}
+    .btn-secondary {background:rgba(255,255,255,0.1);}
+    .btn-secondary:hover {background:rgba(255,255,255,0.15);}
+    .btn-logout {background: #ff5c5c; padding: 4px 8px; font-size: 12px; margin-left: auto; border-radius: 6px;}
+
+    /* 遊戲介面樣式 */
+    .status{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px; background:rgba(0,0,0,0.2); padding:10px; border-radius:10px;}
+    .user-info {display:flex; align-items:center; width: 100%; font-size:14px;}
+    .balance{font-weight:700; color: #4bb5ff;}
+    
+    .board{display:flex;gap:10px;justify-content:center;align-items:center;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px;margin-bottom:16px}
+    .reel{width:70px;height:70px;border-radius:10px;background:linear-gradient(180deg,#0b1622, #071021);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:var(--text);box-shadow:inset 0 -6px 18px rgba(0,0,0,0.6)}
+
     .controls{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
-    input[type=number]{width:110px;padding:10px;border-radius:10px;border:0;background:rgba(255,255,255,0.03); color:var(--text); outline:2px solid transparent}
-    input[type=number]:focus{outline-color:rgba(124,92,255,0.28)}
-    button{padding:10px 14px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent),#4bb5ff); color:white;font-weight:700;cursor:pointer;transform:translateZ(0);transition:transform .12s ease, box-shadow .12s ease}
-    button:active{transform:translateY(2px)}
-    button[disabled]{opacity:.45;cursor:not-allowed}
-    button.spin:hover{filter:brightness(1.03); box-shadow:0 6px 20px rgba(124,92,255,0.18)}
+    input.bet-input {width:100px; text-align:center;}
 
-    /* 槽輪 */
-    .board{display:flex;gap:10px;justify-content:center;align-items:center;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px;margin-bottom:12px}
-    .reel{width:78px;height:78px;border-radius:10px;background:linear-gradient(180deg,#0b1622, #071021);display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:800;color:var(--text);letter-spacing:2px;box-shadow:inset 0 -6px 18px rgba(0,0,0,0.6)}
+    .message{min-height:40px;text-align:center;font-size:14px; line-height:1.4;}
+    .error-msg {color: var(--error); font-size: 13px; text-align: center; min-height: 20px; margin-top: 5px;}
+    
+    .rules{font-size:12px;text-align:center;margin-top:12px;color:rgba(230,238,248,0.5); border-top: 1px solid rgba(255,255,255,0.1); padding-top:10px;}
 
-    .message{min-height:36px;text-align:center;font-size:14px}
-    .small{font-size:12px;color:rgba(230,238,248,0.7)}
-    .rules{font-size:13px;text-align:center;margin-top:8px;color:rgba(230,238,248,0.75)}
-
-    /* 轉動時的字母快速變化效果（使用 JS 控制類名） */
+    /* 頁面切換控制 */
+    .hidden {display:none !important;}
+    
+    /* 動畫 */
     .shimmer{animation:shimmer 90ms steps(1) infinite}
     @keyframes shimmer{to{opacity:.85}}
   </style>
 </head>
 <body>
+
   <div class="wrap">
-    <h1>Letters Slot — 吃角子老虎機</h1>
-    <div class="status">
-      <div class="balance">餘額：<span id="balance">1000</span> 點</div>
-      <div class="small">三個相同：下注 x3，兩個相同：下注 x1.25</div>
+    <div id="auth-view">
+      <h1>會員登入</h1>
+      <div class="form-group">
+        <label>使用者名稱</label>
+        <input type="text" id="username" placeholder="輸入帳號..." autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>密碼</label>
+        <input type="password" id="password" placeholder="輸入密碼...">
+      </div>
+      <div class="error-msg" id="auth-msg"></div>
+      <div class="btn-group">
+        <button class="btn-secondary" id="btn-register">註冊</button>
+        <button class="btn-primary" id="btn-login">登入</button>
+      </div>
+      <div class="rules" style="margin-top: 20px;">註冊新帳號將獲得 1000 點初始額度</div>
     </div>
 
-    <div class="board">
-      <div class="reel" id="r1">A</div>
-      <div class="reel" id="r2">B</div>
-      <div class="reel" id="r3">C</div>
-    </div>
+    <div id="game-view" class="hidden">
+      <div class="status">
+        <div class="user-info">
+          <span id="display-user">User</span>
+          <button class="btn-logout" id="btn-logout">登出</button>
+        </div>
+      </div>
+      <div style="text-align:center; margin-bottom:10px;">
+        餘額：<span class="balance" id="balance">0</span> 點
+      </div>
 
-    <div class="controls">
-      <input id="bet" type="number" min="1" value="10" />
-      <button id="spin" class="spin">SPIN</button>
-    </div>
+      <div class="board">
+        <div class="reel" id="r1">A</div>
+        <div class="reel" id="r2">B</div>
+        <div class="reel" id="r3">C</div>
+      </div>
 
-    <div class="message" id="message">請輸入下注金額後按「SPIN」。</div>
-    <div class="rules">字母：a ~ z（共 26 種）</div>
+      <div class="controls">
+        <input id="bet" class="bet-input" type="number" min="1" value="10" />
+        <button id="spin" class="btn-primary spin">SPIN</button>
+      </div>
+
+      <div class="message" id="message">請輸入下注金額後按「SPIN」。</div>
+      <div class="rules">
+        規則：3個相同 x3｜2個相同 x1.25<br>
+        <span style="opacity:0.7">資料會自動儲存於此瀏覽器</span>
+      </div>
+    </div>
   </div>
 
   <script>
     (function(){
-      const letters = Array.from({length:26},(_,i)=>String.fromCharCode(97+i)); // a-z
+      // --- 系統變數 ---
+      const STORAGE_KEY = 'slot_game_users'; // LocalStorage 的 key
+      let currentUser = null; // 當前登入的使用者資料
+      let spinning = false;
+
+      // --- DOM 元素 ---
+      const authView = document.getElementById('auth-view');
+      const gameView = document.getElementById('game-view');
+      const authMsg = document.getElementById('auth-msg');
+      const userInp = document.getElementById('username');
+      const passInp = document.getElementById('password');
+      
+      // 遊戲元素
       const r1 = document.getElementById('r1');
       const r2 = document.getElementById('r2');
       const r3 = document.getElementById('r3');
@@ -69,87 +132,167 @@
       const betInput = document.getElementById('bet');
       const msg = document.getElementById('message');
       const balSpan = document.getElementById('balance');
+      const displayUser = document.getElementById('display-user');
+      const letters = Array.from({length:26},(_,i)=>String.fromCharCode(97+i));
 
-      let balance = 1000;
-      let spinning = false;
-
-      function randLetter(){
-        return letters[Math.floor(Math.random()*letters.length)];
+      // --- 資料庫功能 (模擬) ---
+      function getDB() {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : {};
       }
 
+      function saveDB(db) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      }
+
+      function updateUserBalance(username, newBalance) {
+        const db = getDB();
+        if(db[username]) {
+          db[username].balance = newBalance;
+          saveDB(db);
+        }
+      }
+
+      // --- 登入/註冊邏輯 ---
+      
+      function switchView(isGame) {
+        if(isGame) {
+          authView.classList.add('hidden');
+          gameView.classList.remove('hidden');
+        } else {
+          authView.classList.remove('hidden');
+          gameView.classList.add('hidden');
+          // 重置輸入框
+          userInp.value = '';
+          passInp.value = '';
+          authMsg.textContent = '';
+        }
+      }
+
+      document.getElementById('btn-login').addEventListener('click', () => {
+        const u = userInp.value.trim();
+        const p = passInp.value.trim();
+        if(!u || !p) { authMsg.textContent = '請輸入帳號與密碼'; return; }
+
+        const db = getDB();
+        if (db[u] && db[u].password === p) {
+          // 登入成功
+          currentUser = { username: u, balance: db[u].balance };
+          initGame();
+        } else {
+          authMsg.textContent = '帳號或密碼錯誤，或帳號不存在';
+        }
+      });
+
+      document.getElementById('btn-register').addEventListener('click', () => {
+        const u = userInp.value.trim();
+        const p = passInp.value.trim();
+        if(!u || !p) { authMsg.textContent = '請輸入帳號與密碼'; return; }
+
+        const db = getDB();
+        if (db[u]) {
+          authMsg.textContent = '此帳號已被註冊';
+        } else {
+          // 註冊成功 (送 1000 點)
+          db[u] = { password: p, balance: 1000 };
+          saveDB(db);
+          authMsg.style.color = '#4bb5ff';
+          authMsg.textContent = '註冊成功！請點擊登入。';
+          setTimeout(() => authMsg.style.color = '', 3000);
+        }
+      });
+
+      document.getElementById('btn-logout').addEventListener('click', () => {
+        currentUser = null;
+        switchView(false);
+      });
+
+      // --- 遊戲邏輯 ---
+
+      function initGame() {
+        displayUser.textContent = `Hi, ${currentUser.username}`;
+        balSpan.textContent = currentUser.balance;
+        msg.textContent = '請輸入下注金額後按「SPIN」。';
+        spinBtn.disabled = false;
+        switchView(true);
+      }
+
+      function updateVisualBalance(delta) {
+        // 更新記憶體中的變數
+        let newBal = Math.round((currentUser.balance + delta) * 100) / 100;
+        currentUser.balance = newBal;
+        // 更新畫面
+        balSpan.textContent = newBal;
+        // 存入資料庫 (持久化)
+        updateUserBalance(currentUser.username, newBal);
+      }
+
+      function randLetter(){ return letters[Math.floor(Math.random()*letters.length)]; }
       function setReel(el, ch){ el.textContent = ch.toUpperCase(); }
 
       function calcPayout(bet, results){
-        // results: array of 3 letters
         const counts = {};
         results.forEach(x=>counts[x] = (counts[x]||0)+1);
         const vals = Object.values(counts);
-        if(vals.includes(3)){
-          return bet * 3;
-        }
-        if(vals.includes(2)){
-          return Math.round(bet * 1.25 * 100) / 100; // 四捨五入到小數點後2位
-        }
-        return 0; // 沒中
+        if(vals.includes(3)) return bet * 3;
+        if(vals.includes(2)) return Math.round(bet * 1.25 * 100) / 100;
+        return 0;
       }
-
-      function updateBalance(delta){ balance = Math.round((balance + delta) * 100) / 100; balSpan.textContent = balance; }
-
-      function disableControls(v){ spinBtn.disabled = v; betInput.disabled = v; }
 
       spinBtn.addEventListener('click', ()=>{
         if(spinning) return;
         let bet = Number(betInput.value) || 0;
-        if(!Number.isFinite(bet) || bet <= 0){ msg.textContent = '請輸入正確的下注金額（大於 0）。'; return; }
-        if(bet > balance){ msg.textContent = '餘額不足。'; return; }
+        if(bet <= 0){ msg.textContent = '金額錯誤'; return; }
+        if(bet > currentUser.balance){ msg.textContent = '餘額不足'; return; }
 
-        // 開始轉動
-        spinning = true; disableControls(true);
-        msg.textContent = '滾動中...';
+        spinning = true; 
+        spinBtn.disabled = true; betInput.disabled = true;
+        msg.textContent = '轉動中...';
+        
+        // 扣款
+        updateVisualBalance(-bet);
 
-        // 先扣除下注金額（下注時從餘額扣除，之後再發放中獎金）
-        updateBalance(-bet);
-
-        // 快速顯示隨機字母
+        // 動畫
         const reels = [r1,r2,r3];
-        const intervals = [];
         reels.forEach(r=> r.classList.add('shimmer'));
-        reels.forEach((r, idx)=>{
-          intervals[idx] = setInterval(()=>{ setReel(r, randLetter()); }, 80);
-        });
+        
+        let intervals = reels.map(r => setInterval(()=>setReel(r, randLetter()), 80));
 
-        // 停止時間分別延遲，模擬機械槽輪停止
         const stopDelays = [800, 1200, 1600];
+        
         setTimeout(()=>{ clearInterval(intervals[0]); setReel(r1, randLetter()); }, stopDelays[0]);
         setTimeout(()=>{ clearInterval(intervals[1]); setReel(r2, randLetter()); }, stopDelays[1]);
-        setTimeout(()=>{ clearInterval(intervals[2]); setReel(r3, randLetter());
-          // 最終結果決定在第三輪停止後
+        
+        setTimeout(()=>{ 
+          clearInterval(intervals[2]); 
+          setReel(r3, randLetter());
           reels.forEach(r=> r.classList.remove('shimmer'));
 
-          const results = [r1.textContent.toLowerCase(), r2.textContent.toLowerCase(), r3.textContent.toLowerCase()];
-          const payout = calcPayout(bet, results);
+          // 結算
+          const res = reels.map(r => r.textContent.toLowerCase());
+          const payout = calcPayout(bet, res);
 
           if(payout > 0){
-            updateBalance(payout);
-            msg.innerHTML = `結果： ${results.map(x=>x.toUpperCase()).join(' - ')}。 恭喜中獎！你獲得 ${payout}（含本金）。`;
-          }
-          else{
-            msg.innerHTML = `結果： ${results.map(x=>x.toUpperCase()).join(' - ')}。 沒有中獎，失去 ${bet}。`;
+            updateVisualBalance(payout);
+            msg.innerHTML = `<span style="color:#4bb5ff">中獎！</span> ${res.join('-').toUpperCase()} 獲得 ${payout}`;
+          } else {
+            msg.textContent = `未中獎 ${res.join('-').toUpperCase()}`;
           }
 
-          // 如果餘額為 0，提醒並停用
-          if(balance <= 0){ msg.textContent += ' 你的餘額已耗盡。請重新整理頁面以重置。'; disableControls(true); }
-          else{ disableControls(false); }
+          if(currentUser.balance <= 0){
+             msg.innerHTML += '<br><span style="color:#ff5c5c">破產了！請註冊新帳號重來。</span>';
+             spinBtn.disabled = true;
+          } else {
+             spinBtn.disabled = false;
+             betInput.disabled = false;
+          }
           spinning = false;
         }, stopDelays[2] + 80);
       });
 
-      // 初始化三個字母
-      setReel(r1, randLetter()); setReel(r2, randLetter()); setReel(r3, randLetter());
-      balSpan.textContent = balance;
-
-      // 小鍵盤支援：按 Enter 也能 Spin
-      betInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ spinBtn.click(); } });
+      // 支援 Enter 鍵
+      userInp.addEventListener('keydown', (e)=>{ if(e.key==='Enter') passInp.focus(); });
+      passInp.addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('btn-login').click(); });
 
     })();
   </script>
